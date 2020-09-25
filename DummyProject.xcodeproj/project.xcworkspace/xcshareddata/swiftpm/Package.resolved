@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Networking",
+        "repositoryURL": "https://github.com/festrs/Networking.git",
+        "state": {
+          "branch": null,
+          "revision": "6d63478284756000807454102721b7b24eaa0bbc",
+          "version": "0.0.3"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
