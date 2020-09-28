@@ -37,10 +37,10 @@ struct CurrentWeatherRow: View {
   
   var body: some View {
     VStack(alignment: .leading) {
-//      MapView(coordinate: viewModel.coordinate)
-//        .cornerRadius(25)
-//        .frame(height: 300)
-//        .disabled(true)
+      MapView(coordinate: viewModel.coordinate)
+        .cornerRadius(25)
+        .frame(height: 300)
+        .disabled(true)
       
       VStack(alignment: .leading) {
         HStack {

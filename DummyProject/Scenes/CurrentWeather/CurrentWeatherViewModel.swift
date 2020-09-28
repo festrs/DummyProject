@@ -45,11 +45,11 @@ class CurrentWeatherViewModel: ObservableObject {
     useCase.currentWeather(at: city)
       .map(CurrentWeatherRowViewModel.init)
       .receive(on: DispatchQueue.main)
-      .sinkToResult { result in
+      .sinkToResult(for: self) { (viewModel, result) in
         if case let .success(object) = result {
-          self.dataSource = object
+          viewModel.dataSource = object
         }
-    }
-    .store(in: &disposables)
+      }
+      .store(in: &disposables)
   }
 }

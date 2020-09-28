@@ -52,18 +52,18 @@ class WeeklyWeatherViewModel: ObservableObject {
     useCase.weeaklyWeatherForecast(at: city)
       .map { response in
         response.list.map(DailyWeatherRowViewModel.init)
-      }
-      .receive(on: DispatchQueue.main)
-    .sinkToResult { result in
+    }
+    .receive(on: DispatchQueue.main)
+    .sinkToResult(for: self) { (viewModel, result) in
       switch result {
       case let .success(list):
-        self.dataSource = .loaded(list)
+        viewModel.dataSource = .loaded(list)
 
       case let .failure(error):
-        self.dataSource = .failed(error)
-        break
+        viewModel.dataSource = .failed(error)
       }
-    }.store(in: &disposables)
+    }
+    .store(in: &disposables)
   }
 }
 

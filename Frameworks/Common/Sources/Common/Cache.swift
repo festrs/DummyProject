@@ -13,7 +13,7 @@ public final class Cache<Key: Hashable, Value> {
   private let entryLifetime: TimeInterval
 
   public init(dateProvider: @escaping () -> Date = Date.init,
-       entryLifetime: TimeInterval = 12 * 60 * 60) {
+              entryLifetime: TimeInterval = 12 * 60 * 60) {
     self.dateProvider = dateProvider
     self.entryLifetime = entryLifetime
   }
@@ -30,7 +30,6 @@ public final class Cache<Key: Hashable, Value> {
     }
 
     guard dateProvider() < entry.expirationDate else {
-      // Discard values that have expired
       removeValue(forKey: key)
       return nil
     }
@@ -80,8 +79,6 @@ public extension Cache {
     get { return value(forKey: key) }
     set {
       guard let value = newValue else {
-        // If nil was assigned using our subscript,
-        // then we remove any value for that key:
         removeValue(forKey: key)
         return
       }
