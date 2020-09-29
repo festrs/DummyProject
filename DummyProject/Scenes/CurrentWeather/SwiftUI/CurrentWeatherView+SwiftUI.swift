@@ -27,48 +27,56 @@
 /// THE SOFTWARE.
 
 import SwiftUI
-import Combine
-import Common
 
-final class WeeklyWeatherViewModel: ObservableObject {
-  @Published var city: String = ""
-  @Published var dataSource: Loadable<[DailyWeatherRowViewModel]> = .notRequested
-  private var disposables = Set<AnyCancellable>()
-  private let useCase: WeatherForecastUseCase
+struct CurrentWeatherViewSwiftUI: View {
+  @ObservedObject var viewModel: CurrentWeatherViewModel
 
-  init(useCase: WeatherForecastUseCase,
-       scheduler: DispatchQueue = DispatchQueue(label: "WeatherViewModel")) {
-    self.useCase = useCase
-    $city
-      .dropFirst(1)
-      .debounce(for: .seconds(0.5), scheduler: scheduler)
-      .sink(receiveValue: fetchWeather(forCity:))
-      .store(in: &disposables)
+  init(viewModel: CurrentWeatherViewModel) {
+    self.viewModel = viewModel
   }
 
-  func fetchWeather(forCity city: String) {
-    useCase.weeaklyWeatherForecast(at: city)
-      .map { response in
-        response.list.map(DailyWeatherRowViewModel.init)
-    }
-    .receive(on: DispatchQueue.main)
-    .sinkToResult(for: self) { (viewModel, result) in
-      switch result {
-      case let .success(list):
-        viewModel.dataSource = .loaded(list)
-
-      case let .failure(error):
-        viewModel.dataSource = .failed(error)
-      }
-    }
-    .store(in: &disposables)
+  var body: some View {
+    List(content: content)
+      .onAppear(perform: viewModel.refresh)
+      .navigationBarTitle(viewModel.city)
+      .listStyle(GroupedListStyle())
   }
 }
 
-extension WeeklyWeatherViewModel {
-  var currentWeatherView: some View {
-    return WeeklyWeatherBuilder.makeCurrentWeatherView(
-      withCity: city, useCase: useCase
-    )
+private extension CurrentWeatherViewSwiftUI {
+  func content() -> some View {
+    if let viewModel = viewModel.dataSource {
+      return AnyView(details(for: viewModel))
+    } else {
+      return AnyView(loading)
+    }
+  }
+
+  func details(for viewModel: CurrentWeatherRowViewModel) -> some View {
+    CurrentWeatherRow(viewModel: viewModel)
+  }
+
+  var loading: some View {
+    Text("Loading \(viewModel.city)'s weather...")
+      .foregroundColor(.gray)
+  }
+}
+
+// MARK: - Previews
+
+struct CurrentWeatherViewSwiftUI_Previews: PreviewProvider {
+  static let viewModel = CurrentWeatherViewModel(city: "Porto Alegre",
+                                                 useCase: WeatherForecastUseCaseMock())
+  static var previews: some View {
+    Group {
+      NavigationView {
+        CurrentWeatherViewSwiftUI(viewModel: viewModel)
+          .colorScheme(.light)
+      }
+      NavigationView {
+        CurrentWeatherViewSwiftUI(viewModel: viewModel)
+          .colorScheme(.dark)
+      }
+    }
   }
 }

@@ -29,10 +29,9 @@
 import SwiftUI
 import Combine
 
-class CurrentWeatherViewModel: ObservableObject {
-  @Published var dataSource: CurrentWeatherRowViewModel?
-
+final class CurrentWeatherViewModel: ObservableObject {
   let city: String
+  @Published private(set) var dataSource: CurrentWeatherRowViewModel?
   private let useCase: WeatherForecastUseCase
   private var disposables = Set<AnyCancellable>()
 

@@ -32,6 +32,6 @@ enum WeeklyWeatherBuilder {
   static func makeCurrentWeatherView(withCity city: String,
                                      useCase: WeatherForecastUseCase) -> some View {
     let viewModel = CurrentWeatherViewModel(city: city, useCase: useCase)
-    return CurrentWeatherView(viewModel: viewModel)
+    return CurrentWeatherViewSwiftUI(viewModel: viewModel)
   }
 }
