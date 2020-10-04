@@ -29,10 +29,9 @@
 import SwiftUI
 import Combine
 
-class CurrentWeatherViewModel: ObservableObject {
-  @Published var dataSource: CurrentWeatherRowViewModel?
-
+final class CurrentWeatherViewModel: ObservableObject {
   let city: String
+  @Published private(set) var dataSource: CurrentWeatherRowViewModel?
   private let useCase: WeatherForecastUseCase
   private var disposables = Set<AnyCancellable>()
 
@@ -45,11 +44,11 @@ class CurrentWeatherViewModel: ObservableObject {
     useCase.currentWeather(at: city)
       .map(CurrentWeatherRowViewModel.init)
       .receive(on: DispatchQueue.main)
-      .sinkToResult { result in
+      .sinkToResult(for: self) { (viewModel, result) in
         if case let .success(object) = result {
-          self.dataSource = object
+          viewModel.dataSource = object
         }
-    }
-    .store(in: &disposables)
+      }
+      .store(in: &disposables)
   }
 }

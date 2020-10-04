@@ -57,14 +57,18 @@ struct DailyWeatherRowViewModel: Identifiable {
     guard let description = item.weather.first?.weatherDescription else { return "" }
     return description
   }
-  
+
   init(item: WeeklyForecastResponse.Item) {
     self.item = item
   }
 }
 
-// Used to hash on just the day in order to produce a single view model for each
-// day when there are multiple items per each day.
+extension DailyWeatherRowViewModel {
+  func configureWeeklyCell(_ cell: UITableViewCell) {
+    
+  }
+}
+
 extension DailyWeatherRowViewModel: Hashable {
   static func == (lhs: DailyWeatherRowViewModel, rhs: DailyWeatherRowViewModel) -> Bool {
     return lhs.day == rhs.day

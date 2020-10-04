@@ -27,48 +27,46 @@
 /// THE SOFTWARE.
 
 import SwiftUI
-import Combine
-import Common
 
-final class WeeklyWeatherViewModel: ObservableObject {
-  @Published var city: String = ""
-  @Published var dataSource: Loadable<[DailyWeatherRowViewModel]> = .notRequested
-  private var disposables = Set<AnyCancellable>()
-  private let useCase: WeatherForecastUseCase
-
-  init(useCase: WeatherForecastUseCase,
-       scheduler: DispatchQueue = DispatchQueue(label: "WeatherViewModel")) {
-    self.useCase = useCase
-    $city
-      .dropFirst(1)
-      .debounce(for: .seconds(0.5), scheduler: scheduler)
-      .sink(receiveValue: fetchWeather(forCity:))
-      .store(in: &disposables)
+struct CurrentWeatherRow: View {
+  private let viewModel: CurrentWeatherRowViewModel
+  
+  init(viewModel: CurrentWeatherRowViewModel) {
+    self.viewModel = viewModel
   }
-
-  func fetchWeather(forCity city: String) {
-    useCase.weeaklyWeatherForecast(at: city)
-      .map { response in
-        response.list.map(DailyWeatherRowViewModel.init)
-    }
-    .receive(on: DispatchQueue.main)
-    .sinkToResult(for: self) { (viewModel, result) in
-      switch result {
-      case let .success(list):
-        viewModel.dataSource = .loaded(list)
-
-      case let .failure(error):
-        viewModel.dataSource = .failed(error)
+  
+  var body: some View {
+    VStack(alignment: .leading) {
+      MapView(coordinate: viewModel.coordinate)
+        .cornerRadius(25)
+        .frame(height: 300)
+        .disabled(true)
+      
+      VStack(alignment: .leading) {
+        HStack {
+          Text("☀️ Temperature:")
+          Text("\(viewModel.temperature)°")
+            .foregroundColor(.gray)
+        }
+        
+        HStack {
+          Text("📈 Max temperature:")
+          Text("\(viewModel.maxTemperature)°")
+            .foregroundColor(.gray)
+        }
+        
+        HStack {
+          Text("📉 Min temperature:")
+          Text("\(viewModel.minTemperature)°")
+            .foregroundColor(.gray)
+        }
+        
+        HStack {
+          Text("💧 Humidity:")
+          Text(viewModel.humidity)
+            .foregroundColor(.gray)
+        }
       }
     }
-    .store(in: &disposables)
-  }
-}
-
-extension WeeklyWeatherViewModel {
-  var currentWeatherView: some View {
-    return WeeklyWeatherBuilder.makeCurrentWeatherView(
-      withCity: city, useCase: useCase
-    )
   }
 }
